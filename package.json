@@ -1,0 +1,23 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "mock ecommerce site",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharryheb/bamazon.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sharryheb/bamazon/issues"
+  },
+  "homepage": "https://github.com/sharryheb/bamazon#readme",
+  "dependencies": {
+    "inquirer": "^6.5.1",
+    "mysql": "^2.17.1"
+  }
+}
