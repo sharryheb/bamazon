@@ -1,9 +1,6 @@
-// Challenge #1: Customer View (Minimum Requirement)
-
-
-//First display all of the items available for sale. Include the ids, names, and prices of products for sale.
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var table = require('easy-table')
 
 var connection = mysql.createConnection(
     {
@@ -13,7 +10,7 @@ var connection = mysql.createConnection(
         password: "",
         database: "bamazon"
     }
-)
+);
 
 connection.connect(function(err)
 {
@@ -21,31 +18,62 @@ connection.connect(function(err)
 
     var query = 'select * from products';
 
-    connection.query(query, function(err, response)
-    {
+    connection.query(query, function(err, products)
+    {   
         if (err) throw err;
 
         else
         {
-            for (product in response)
-            {
-                console.log(response.product);
-            }
+            console.log(table.print(products));
+            promptUser(products);
         }
-        
-        connection.end();
     });
 });
 
-// The app should then prompt users with two messages:
-// The first should ask them the ID of the product they would like to buy.
-// The second message should ask how many units of the product they would like to buy.
+function promptUser(products)
+{
+    inquirer.prompt([
+        {
+            name: "id",
+            type: "number",
+            message: "Enter the ID number of the product you would like to buy: "
+        },
+        {
+            name: "howMany",
+            type: "number",
+            message: "How many would you like to buy?"
+        }
+    ]).then(function(answers) 
+    {
+        for (product in products)
+        {
+            if (products[product].item_id === answers.id)
+            {
+                if (products[product].stock_quantity >= answers.howMany)
+                {
+                    completePurchase(products[product], answers);
+                }
+                else
+                {
+                    console.log("Insufficient quantity!");
+                    connection.end();
+                }
+            }
+        }
+    });
+};
 
-// Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
-
-// If not, the app should log a phrase like Insufficient quantity!, and then prevent the order from going through.
-
-// However, if your store does have enough of the product, you should fulfill the customer's order.
-
-// This means updating the SQL database to reflect the remaining quantity.
-// Once the update goes through, show the customer the total cost of their purchase.
+function completePurchase(productInfo, userAnswers)
+{
+    var quantityLeft = productInfo.stock_quantity - userAnswers.howMany;
+    var totalCost = userAnswers.howMany * productInfo.price;
+    connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [quantityLeft, productInfo.item_id], function(err)
+    {
+        if (err) throw err;
+        else
+        {
+            console.log("Purchase complete! The total cost for your order is: " + totalCost);
+        }
+        connection.end();
+    });
+};
