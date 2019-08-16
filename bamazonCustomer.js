@@ -16,18 +16,7 @@ connection.connect(function(err)
 {
     if (err) throw err;
 
-    var query = 'select * from products';
-
-    connection.query(query, function(err, products)
-    {   
-        if (err) throw err;
-
-        else
-        {
-            console.log(table.print(products));
-            promptUser(products);
-        }
-    });
+    viewProducts();
 });
 
 function promptUser(products)
@@ -56,24 +45,37 @@ function promptUser(products)
                 else
                 {
                     console.log("Insufficient quantity!");
-                    connection.end();
                 }
             }
         }
     });
 };
 
+function viewProducts(products)
+{
+    var query = 'select * from products';
+
+    connection.query(query, function(err, products)
+    {   
+        if (err) throw err;
+        else
+        {
+            console.log(table.print(products));
+            promptUser(products);
+        }
+    });
+}
+
 function completePurchase(productInfo, userAnswers)
 {
     var quantityLeft = productInfo.stock_quantity - userAnswers.howMany;
     var totalCost = userAnswers.howMany * productInfo.price;
-    connection.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [quantityLeft, productInfo.item_id], function(err)
+    connection.query('UPDATE products SET stock_quantity = ? AND product_sales = ? WHERE item_id = ?', [quantityLeft, productInfo.product_sales + totalCost, productInfo.item_id], function(err)
     {
         if (err) throw err;
         else
         {
             console.log("Purchase complete! The total cost for your order is: " + totalCost);
         }
-        connection.end();
     });
 };
