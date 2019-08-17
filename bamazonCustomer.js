@@ -60,7 +60,9 @@ function viewProducts(products)
         if (err) throw err;
         else
         {
+            console.log();
             console.log(table.print(products));
+            console.log("\nPress Ctrl-C at any time to exit.\n".toUpperCase());
             promptUser(products);
         }
     });
@@ -68,14 +70,17 @@ function viewProducts(products)
 
 function completePurchase(productInfo, userAnswers)
 {
-    var quantityLeft = productInfo.stock_quantity - userAnswers.howMany;
-    var totalCost = userAnswers.howMany * productInfo.price;
-    connection.query('UPDATE products SET stock_quantity = ? AND product_sales = ? WHERE item_id = ?', [quantityLeft, productInfo.product_sales + totalCost, productInfo.item_id], function(err)
+    var quantityPurchased = parseInt(userAnswers.howMany);
+    var totalCost = quantityPurchased * parseFloat(productInfo.price);
+
+    connection.query('UPDATE products SET stock_quantity = stock_quantity - ?, product_sales = product_sales + ? WHERE item_id = ?', [quantityPurchased, totalCost, productInfo.item_id], function(err)
     {
         if (err) throw err;
         else
         {
             console.log("Purchase complete! The total cost for your order is: " + totalCost);
+            viewProducts();
         }
     });
+
 };
